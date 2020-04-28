@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	// "sync"
 	"time"
@@ -17,6 +18,7 @@ Tests:
 - given test files
 - test files on git and get raw data somehow
 - random urls that shouldn't give you data like google.com
+- csv data with trailing and leading spaces
 
 Error Cases:
 - file or url does not exist
@@ -34,6 +36,7 @@ Think About:
 - how to store data and use to get stats? --> 2 maps = (age -> count, age -> name) / have one for each file and compile into overall 
 - how to aggregate concurrency results from each file? 
 - how to deal with median value in between two data points? --> check if total records is even or odd, if even get
+- keep track of urls you could not get data from
 **/
 
 //reads input file of urls to call to get csv files
@@ -49,7 +52,7 @@ func readInputFile() ([]string, error){
     log.Println("Attempting to read file...")
     data, err := ioutil.ReadFile(os.Args[1])
     if err != nil {
-        log.Println("Error reading file: ", err.Error())
+        log.Println("Error reading file:", err.Error())
         return nil, err
     }
 
@@ -72,33 +75,72 @@ func getCsvInBatches(urlList []string) {
 }
 
 //calls the given url and reads the data in the response
-func getCsv(csvUrl string) (map[int]int, map[int]string, error) {
+func retrieveCsvDataFromUrl(csvUrl string) (map[string]int, map[string]string, error) {
+	log.Println("Retrieving data from: ", csvUrl)
 	resp, err := http.Get(csvUrl)
 	if err != nil {
+		log.Println("Error with http request:",  err.Error())
 		return nil, nil, err
 	}
 
 	defer resp.Body.Close()
+
+	//check if http returned data succesfully
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		log.Println("Http request returned:", resp.StatusCode)
+		return nil, nil, err
+	}
+
+	//read csv
 	reader := csv.NewReader(resp.Body)
 	data, err := reader.ReadAll()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	log.Println(data)
-
-	ageCount := make(map[int]int, 0)
-	ageToName := make(map[int]string, 0)
-	// csvRows := strings.Split(string(data), "\n")
-	// for _, row := range(csvRows) {
-	// 	log.Println(row)
-	// }
-
+	ageCount, ageToName := organizeData(data)
 	return ageCount, ageToName, nil
 }
 
-//compile csv data from each request into overall maps for final stat calculations
-func compileData() {
+//organize data from http request into maps
+func organizeData(data [][]string) (map[string]int, map[string]string) {
+	ageCount := make(map[string]int, 0)
+	ageToName := make(map[string]string, 0)
+	for i, row := range(data) {
+		//check if csv data is valid
+		if len(row) != 3 {
+			log.Println("Row " + string(i) + " is not valid format for data.")
+			continue
+		}
+		if _, serr := strconv.Atoi(row[2]); serr != nil {
+			log.Println("Row " + string(i) + " does not have a valid value for age.")
+			continue
+		}
+
+		//parse data
+		fname := strings.Trim(row[0], " ")
+		lname := strings.Trim(row[1], " ")
+		name := fname + " " + lname
+		age := strings.Trim(row[2], " ")
+
+		//update count for given age
+		if val, found := ageCount[age]; found {
+			ageCount[age] = val + 1
+		} else {
+			ageCount[age] = 1
+		}
+
+		//only set name associated to age on first occurence of age
+		if _, found := ageToName[age]; !found {
+			ageToName[age] = name
+		}
+	}
+
+	return ageCount, ageToName
+}
+
+//aggregate csv data from each request into overall maps for final stat calculations
+func aggregateData() {
 
 }
 
@@ -120,10 +162,13 @@ func main() {
 		panic(rerr)
 	}
 
-	_, _, gerr := getCsv(urlList[0])
+	countMap, nameMap, gerr := retrieveCsvDataFromUrl(urlList[0])
 	if gerr != nil {
 		panic(gerr)
 	}
+
+	log.Println(countMap)
+	log.Println(nameMap)
 
 	totalTime := time.Now().Sub(start)
 	log.Println("Total Runtime: ", totalTime)

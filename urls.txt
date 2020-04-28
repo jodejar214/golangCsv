@@ -1,4 +1,4 @@
-file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file1.csv
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file1.csv?token=ACHTPLWE6XVENL7BBBFDAUC6U6V5E
 file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file2.csv
 file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file3.csv
 file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file4.csv
