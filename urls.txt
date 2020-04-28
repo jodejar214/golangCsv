@@ -1,0 +1,9 @@
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file1.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file2.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file3.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file4.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file5.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file6_bad.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file7.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file8.csv
+file:///Users/John.Adelbert.Odejar@ibm.com/go/src/engineer-homework/data/file9_bad.csv
