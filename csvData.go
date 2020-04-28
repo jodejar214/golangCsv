@@ -9,7 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	// "sync"
+	"sort"
 	"time"
 )
 
@@ -19,6 +19,9 @@ Tests:
 - test files on git and get raw data somehow
 - random urls that shouldn't give you data like google.com
 - csv data with trailing and leading spaces
+- even number of data points
+- odd number of data points with median between same age value
+- odd number of data points with median between diff age value
 
 Error Cases:
 - file or url does not exist
@@ -70,16 +73,40 @@ func readInputFile() ([]string, error){
 }
 
 //get data from urls in batches using concurrency
-func getCsvInBatches(urlList []string) {
+func getCsvInBatches(urlList []string) (map[int]int, map[int]string) {
+	finalCountMap := make(map[int]int, 0)
+	finalNameMap := make(map[int]string, 0)
 
+	for _, csvUrl := range(urlList) {
+		countMap, nameMap, rerr := retrieveCsvDataFromUrl(csvUrl)
+		if rerr != nil {
+			log.Println("Error retrieving data:", rerr.Error())
+			continue
+		}
+		
+		for k, v := range(countMap) {
+			if val, found := finalCountMap[k]; found {
+				finalCountMap[k] = val + v
+			} else {
+				finalCountMap[k] = v
+			}
+		}
+
+		for k, v := range(nameMap) {
+			if _, found := finalNameMap[k]; !found {
+				finalNameMap[k] = v
+			}
+		}
+	}
+	return finalCountMap, finalNameMap
 }
 
 //calls the given url and reads the data in the response
-func retrieveCsvDataFromUrl(csvUrl string) (map[string]int, map[string]string, error) {
+func retrieveCsvDataFromUrl(csvUrl string) (map[int]int, map[int]string, error) {
 	log.Println("Retrieving data from: ", csvUrl)
 	resp, err := http.Get(csvUrl)
 	if err != nil {
-		log.Println("Error with http request:",  err.Error())
+		log.Println("Error with HTTP request:",  err.Error())
 		return nil, nil, err
 	}
 
@@ -87,7 +114,8 @@ func retrieveCsvDataFromUrl(csvUrl string) (map[string]int, map[string]string, e
 
 	//check if http returned data succesfully
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		log.Println("Http request returned:", resp.StatusCode)
+		log.Println("HTTP request returned:", resp.StatusCode)
+		err := errors.New("HTTP request did not return csv data successfully.")
 		return nil, nil, err
 	}
 
@@ -98,22 +126,24 @@ func retrieveCsvDataFromUrl(csvUrl string) (map[string]int, map[string]string, e
 		return nil, nil, err
 	}
 
-	ageCount, ageToName := organizeData(data)
-	return ageCount, ageToName, nil
+	ageCount, ageToName, oerr := organizeData(data)
+	return ageCount, ageToName, oerr
 }
 
 //organize data from http request into maps
-func organizeData(data [][]string) (map[string]int, map[string]string) {
-	ageCount := make(map[string]int, 0)
-	ageToName := make(map[string]string, 0)
-	for i, row := range(data) {
-		//check if csv data is valid
+func organizeData(data [][]string) (map[int]int, map[int]string, error) {
+	ageCount := make(map[int]int, 0)
+	ageToName := make(map[int]string, 0)
+
+	if len(data[0]) != 3 {
+		err := errors.New("Csv file data is not formatted correctly.")
+		log.Println("Error organizing data from csv:", err.Error())
+		return nil, nil, err
+	}
+
+	for i, row := range(data[1:]) {
 		if len(row) != 3 {
-			log.Println("Row " + string(i) + " is not valid format for data.")
-			continue
-		}
-		if _, serr := strconv.Atoi(row[2]); serr != nil {
-			log.Println("Row " + string(i) + " does not have a valid value for age.")
+			log.Println("Row", i+1, "is not valid format for data.")
 			continue
 		}
 
@@ -121,7 +151,16 @@ func organizeData(data [][]string) (map[string]int, map[string]string) {
 		fname := strings.Trim(row[0], " ")
 		lname := strings.Trim(row[1], " ")
 		name := fname + " " + lname
-		age := strings.Trim(row[2], " ")
+		ageStr := strings.Trim(row[2], " ")
+		age := 0
+
+		//check if age is valid integer
+		if val, serr := strconv.Atoi(ageStr); serr == nil {
+			age = val
+		} else {
+			log.Println("Row", i+1, "does not have a valid value for age.")
+			continue
+		}
 
 		//update count for given age
 		if val, found := ageCount[age]; found {
@@ -136,40 +175,103 @@ func organizeData(data [][]string) (map[string]int, map[string]string) {
 		}
 	}
 
-	return ageCount, ageToName
+	return ageCount, ageToName, nil
 }
 
-//aggregate csv data from each request into overall maps for final stat calculations
-func aggregateData() {
-
+//calulate stats to be outputted
+func calculateStats(countMap map[int]int, nameMap map[int]string) {
+	log.Println("----------------Results-----------------")
+	getAverageAge(countMap)
+	getMedianAgeAndName(countMap, nameMap)
 }
 
-//calculates average from data compiled from all csvs
-func getAverageAge() {
-
+//calculate average for aggregated dataset
+func getAverageAge(countMap map[int]int) {
+	sum := 0
+	totalCount := 0
+	for k, v := range(countMap) {
+		sum += k * v
+		totalCount += v
+	}
+	avg := sum / totalCount
+	log.Println("The average age is:", avg)
 }
 
-//finds median age and name from data compiled from all csvs
-func getMedianAgeAndName() {
+//find median age and name for aggregated dataset
+func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string) {
+	//find median age index
+	totalCount := 0
+	keyList := make([]int,0)
+	for k, v := range(countMap) {
+		totalCount += v
+		keyList = append(keyList, k)
+	}
 
+	//sort keys to get median value
+	sort.Ints(keyList)
+	
+	//check if median age is value in dataset
+	if totalCount % 2 == 1 {
+		//median is the existing middle value of dataset
+		curInd := 0
+		medInd := (totalCount + 1) / 2
+		medAge := 0
+		for k := range(keyList) {
+			if curInd >= medInd {
+				medAge = k
+				break
+			} else {
+				val := countMap[k]
+				curInd += val
+			}
+		}
+
+		log.Println("The median age is:", medAge)
+		log.Println("A name corresponding to the median age is:", nameMap[medAge])
+	} else {
+		//median is in between two values of dataset and may not exist in dataset
+		curInd := 0
+		medIndLow := totalCount / 2
+		medAgeLow := 0
+		medAgeHigh := 0
+		for i, k := range(keyList) {
+			if curInd == medIndLow {
+				medAgeLow = k
+				medAgeHigh = keyList[i+1]
+				break
+			} else if curInd > medIndLow {
+				medAgeLow = k
+				medAgeHigh = k
+				break
+			} else {
+				val := countMap[k]
+				curInd += val
+			}
+		}
+
+		medAge := (medAgeLow + medAgeHigh) / 2.0
+		log.Println("The median age is:", medAge)
+		if  val, found := nameMap[medAge]; found {
+			log.Println("A name corresponding to the median age is:", val)
+		} else {
+			log.Println("A name cannot be determined since the median age is not an age in the dataset.")
+		}
+	}
 }
 
-func main() {
-	start := time.Now()
-
+func processData() {
 	urlList, rerr := readInputFile()
 	if rerr != nil {
 		panic(rerr)
 	}
 
-	countMap, nameMap, gerr := retrieveCsvDataFromUrl(urlList[0])
-	if gerr != nil {
-		panic(gerr)
-	}
+	finalCountMap, finalNameMap := getCsvInBatches(urlList)
+	calculateStats(finalCountMap, finalNameMap)
+}
 
-	log.Println(countMap)
-	log.Println(nameMap)
-
+func main() {
+	start := time.Now()
+	processData()
 	totalTime := time.Now().Sub(start)
 	log.Println("Total Runtime: ", totalTime)
 }
