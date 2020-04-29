@@ -223,9 +223,11 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList [
 	if totalCount % 2 == 1 {
 		//median is the existing middle value of dataset
 		curInd := 0
-		medInd := (totalCount + 1) / 2
+		medInd := totalCount / 2
 		medAge := 0
-		for k := range(keyList) {
+		log.Println("Total Count:",totalCount)
+		log.Println("Median Index:",medInd)
+		for _, k := range(keyList) {
 			if curInd >= medInd {
 				medAge = k
 				break
@@ -234,8 +236,6 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList [
 				curInd += val
 			}
 		}
-		log.Println(totalCount)
-		log.Println(medInd)
 		log.Println(ageList[medInd])
 		log.Println("The median age is:", medAge)
 		log.Println("A name corresponding to the median age is:", nameMap[medAge])
