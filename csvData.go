@@ -14,24 +14,6 @@ import (
 	"time"
 )
 
-/**
-Error Cases:
-- file or url does not exist
-- returned data is not csv format
-- returned data is not in fname,lname,age format
-- age is not integer
-- returned data is empty
-
-Think About:
-- how to retrieve list of urls or files to read? --> file of urls
-- how to store data and use to get stats? --> 2 maps = (age -> count, age -> name) / have one for each file and compile into overall 
-- how to deal with median value in between two data points? --> check if total records is even or odd, if even get
-
-- concurrency = how many files to do concurrently? --> find out how many files and divide by memory size?
-- how to aggregate concurrency results from each file? 
-- keep track of urls you could not get data from
-**/
-
 //struct for results channels to pass as args
 type CsvResults struct {
 	CountMap map[int]int
