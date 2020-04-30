@@ -18,7 +18,6 @@ import (
 type CsvResults struct {
 	CountMap map[int]int
 	NameMap map[int]string
-	AgeList []int
 }
 
 //reads input file of urls to call to get csv files
@@ -30,7 +29,6 @@ func readInputFile() []string {
     }
 
     //read file
-    fmt.Println("Attempting to read file...")
     data, err := ioutil.ReadFile(os.Args[1])
     if err != nil {
         panic(err)
@@ -44,7 +42,6 @@ func readInputFile() []string {
 
     //make into list to iterate later
     urlList := strings.Split(string(data), "\n")
-    fmt.Println("Need to retrieve", len(urlList), "csv files.")
     return urlList
 }
 
@@ -82,7 +79,7 @@ func getCsvInBatches(urlList []string) (chan *CsvResults, chan string) {
 //calls the given url and reads the data in the response
 func retrieveCsvDataFromUrl(csvUrl string, resultsChan chan *CsvResults, badCsvsChan chan string, wg *sync.WaitGroup){
 	defer wg.Done()
-	fmt.Println("Retrieving data from: ", csvUrl)
+	csvUrl = strings.Trim(csvUrl, " ")
 	resp, err := http.Get(csvUrl)
 	if err != nil {
 		fmt.Println("Error with HTTP request:",  err.Error())
@@ -110,6 +107,12 @@ func retrieveCsvDataFromUrl(csvUrl string, resultsChan chan *CsvResults, badCsvs
 		return
 	}
 
+	if len(data) == 0 {
+		fmt.Println("Csv file has no data.")
+		badCsvsChan <- csvUrl
+		return
+	}
+
 	organizeData(data, resultsChan)
 	return
 }
@@ -119,7 +122,6 @@ func organizeData(data [][]string, resultsChan chan *CsvResults) {
 	results := &CsvResults{
 		CountMap: make(map[int]int, 0),
 		NameMap: make(map[int]string, 0),
-		AgeList: make([]int, 0),
 	}
 
 	for i, row := range(data[1:]) {
@@ -149,8 +151,6 @@ func organizeData(data [][]string, resultsChan chan *CsvResults) {
 		if _, found := results.NameMap[age]; !found {
 			results.NameMap[age] = name
 		}
-
-		results.AgeList = append(results.AgeList, age)
 	}
 	resultsChan <- results
 	return
@@ -160,7 +160,6 @@ func aggregateResults(resultsChan chan *CsvResults, badCsvsChan chan string) (ma
 	//aggregate result objects
 	finalCountMap := make(map[int]int, 0)
 	finalNameMap := make(map[int]string, 0)
-	finalAgeList := make([]int, 0)
 	badCsvs := make([]string, 0)
 
 	//aggregate data results
@@ -178,8 +177,6 @@ func aggregateResults(resultsChan chan *CsvResults, badCsvsChan chan string) (ma
 				finalNameMap[k] = v
 			}
 		}
-
-		finalAgeList = append(finalAgeList, result.AgeList...)
 	}
 
 	//aggregate bad csvs
@@ -187,7 +184,7 @@ func aggregateResults(resultsChan chan *CsvResults, badCsvsChan chan string) (ma
 		badCsvs = append(badCsvs, badCsv)
 	}
 
-	return finalCountMap, finalNameMap, finalAgeList, badCsvs
+	return finalCountMap, finalNameMap, badCsvs
 }
 
 //calculate average for aggregated dataset
@@ -203,7 +200,7 @@ func getAverageAge(countMap map[int]int) {
 }
 
 //find median age and name for aggregated dataset
-func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList []int) {
+func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string) {
 	//find median age index
 	totalCount := 0
 	keyList := make([]int,0)
@@ -214,7 +211,6 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList [
 
 	//sort keys to get median value
 	sort.Ints(keyList)
-	sort.Ints(ageList)
 
 	//check if median age is value in dataset
 	if totalCount % 2 == 1 {
@@ -222,17 +218,11 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList [
 		curInd := 0
 		medInd := totalCount / 2
 		medAge := 0
-		fmt.Println("Total Count:",totalCount)
-		fmt.Println("Median Index:",medInd)
 		for i, k := range(keyList) {
 			if curInd == medInd {
-				fmt.Println("Option1")
-				fmt.Println("Current Index:",curInd)
 				medAge = k
 				break
 			} else if curInd > medInd {
-				fmt.Println("Option2")
-				fmt.Println("Current Index:",curInd)
 				medAge = keyList[i-1]
 				break
 			} else {
@@ -240,7 +230,6 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList [
 				curInd += val
 			}
 		}
-		fmt.Println(ageList[medInd])
 		fmt.Println("The median age is:", medAge)
 		fmt.Println("A name corresponding to the median age is:", nameMap[medAge])
 	} else {
@@ -251,25 +240,16 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList [
 		medAgeLow := 0
 		medAgeHigh := 0
 
-		fmt.Println("Total Count:",totalCount)
-		fmt.Println("Median Index Low:",medIndLow)
-		fmt.Println("Median Index High:",medIndHigh)
 		for i, k := range(keyList) {
 			if curInd == medIndLow && curInd < medIndHigh {
-				fmt.Println("Option1")
-				fmt.Println("Current Index:",curInd)
 				medAgeLow = k
 				medAgeHigh = keyList[i+1]
 				break
 			} else if curInd > medIndLow && curInd == medIndHigh {
-				fmt.Println("Option2")
-				fmt.Println("Current Index:",curInd)
 				medAgeLow = keyList[i-1]
 				medAgeHigh = k
 				break
 			} else if curInd > medIndLow && curInd > medIndHigh {
-				fmt.Println("Option3")
-				fmt.Println("Current Index:",curInd)
 				medAgeLow = keyList[i-1]
 				medAgeHigh = keyList[i-1]
 				break
@@ -278,11 +258,8 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string, ageList [
 				curInd += val
 			}
 		}
-		fmt.Println(ageList[medIndLow])
 		fmt.Println("The median low is:", medAgeLow)
-		fmt.Println(ageList[medIndHigh])
 		fmt.Println("The median high is:", medAgeHigh)
-		fmt.Println((ageList[medIndLow] + ageList[medIndHigh])/2.0)
 		medAge := (medAgeLow + medAgeHigh) / 2.0
 		fmt.Println("The median age is:", medAge)
 		if  val, found := nameMap[medAge]; found {
@@ -303,17 +280,17 @@ func processCsvData() {
 
 	//Print out bad csvs
 	if len(badCsvs) > 0 {
-		fmt.Println("\n\nThese CSVs returned errors when attempting to retrieve data:")
+		fmt.Println("\n\n------------URLs Failed To Be Read------------:")
 		for _, c := range(badCsvs) {
 			fmt.Println(c)
 		}
 	}
 
 	//calculate stats and print out results
+	fmt.Println("\n\n----------------Statistics Results-----------------")
 	if len(finalCountMap) == 0 {
 		fmt.Println("No data was retrieved from the collection of csv files. Cannot caluclate average and median.")
 	} else {
-		fmt.Println("\n\n----------------Results-----------------")
 		getAverageAge(finalCountMap)
 		getMedianAgeAndName(finalCountMap, finalNameMap, finalAgeList)
 	}
