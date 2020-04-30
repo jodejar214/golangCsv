@@ -297,7 +297,7 @@ func processCsvData() {
 	//calculate stats and print out results
 	fmt.Println("\n----------------Statistics Results-----------------")
 	if len(finalCountMap) == 0 {
-		fmt.Println("No data was retrieved from the collection of csv files. Cannot caluclate average and median.")
+		fmt.Println("No data was retrieved from the collection of csv files. Cannot calculate average and median.")
 	} else {
 		getAverageAge(finalCountMap)
 		getMedianAgeAndName(finalCountMap, finalNameMap)
