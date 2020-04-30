@@ -156,7 +156,7 @@ func organizeData(data [][]string, resultsChan chan *CsvResults) {
 	return
 }
 
-func aggregateResults(resultsChan chan *CsvResults, badCsvsChan chan string) (map[int]int, map[int]string, []int, []string) {
+func aggregateResults(resultsChan chan *CsvResults, badCsvsChan chan string) (map[int]int, map[int]string, []string) {
 	//aggregate result objects
 	finalCountMap := make(map[int]int, 0)
 	finalNameMap := make(map[int]string, 0)
@@ -258,8 +258,6 @@ func getMedianAgeAndName(countMap map[int]int, nameMap map[int]string) {
 				curInd += val
 			}
 		}
-		fmt.Println("The median low is:", medAgeLow)
-		fmt.Println("The median high is:", medAgeHigh)
 		medAge := (medAgeLow + medAgeHigh) / 2.0
 		fmt.Println("The median age is:", medAge)
 		if  val, found := nameMap[medAge]; found {
@@ -276,23 +274,23 @@ func processCsvData() {
 
 	//process the csv files
 	resultsChan, badCsvsChan := getCsvInBatches(urlList)
-	finalCountMap, finalNameMap, finalAgeList, badCsvs := aggregateResults(resultsChan, badCsvsChan)
+	finalCountMap, finalNameMap, badCsvs := aggregateResults(resultsChan, badCsvsChan)
 
 	//Print out bad csvs
 	if len(badCsvs) > 0 {
-		fmt.Println("\n\n------------URLs Failed To Be Read------------:")
+		fmt.Println("------------URLs Failed To Be Read------------:")
 		for _, c := range(badCsvs) {
 			fmt.Println(c)
 		}
 	}
 
 	//calculate stats and print out results
-	fmt.Println("\n\n----------------Statistics Results-----------------")
+	fmt.Println("----------------Statistics Results-----------------")
 	if len(finalCountMap) == 0 {
 		fmt.Println("No data was retrieved from the collection of csv files. Cannot caluclate average and median.")
 	} else {
 		getAverageAge(finalCountMap)
-		getMedianAgeAndName(finalCountMap, finalNameMap, finalAgeList)
+		getMedianAgeAndName(finalCountMap, finalNameMap)
 	}
 }
 
