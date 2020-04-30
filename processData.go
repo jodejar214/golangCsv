@@ -20,6 +20,8 @@ type CsvResults struct {
 	NameMap map[int]string
 }
 
+var maxNumOfGoRoutines int
+
 //reads input file of urls to call to get csv files
 func readInputFile() []string {
 	//check for file argument
@@ -48,7 +50,7 @@ func readInputFile() []string {
 //get data from urls in batches using concurrency
 func getCsvInBatches(urlList []string) (chan *CsvResults, chan string) {
 	//limit number of workers to 100
-	maxNumOfGoRoutines := len(urlList)
+	maxNumOfGoRoutines = len(urlList)
 	if len(urlList) > 100 {
 		maxNumOfGoRoutines = 100
 	}
@@ -308,5 +310,5 @@ func main() {
 	start := time.Now()
 	processCsvData()
 	totalTime := time.Now().Sub(start)
-	fmt.Println("Total Runtime: ", totalTime)
+	fmt.Println("Total runtime with a maximum of", maxNumOfGoRoutines, "goroutines running concurrently: ", totalTime)
 }

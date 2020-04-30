@@ -5,22 +5,15 @@
 ### How To Build/Run:
 
 ```
-
 go run processData.go {file with list of urls}
-
 ```
 
 ***Example:***
 ```
-
 go run processData.go urls.txt
-
 ```
 
 ---
-
-
-
 
 ### Implementation
 
@@ -57,9 +50,6 @@ When the median age is found, the program then gets the name corresponding to th
 
 ---
 
-
-
-
 ### Testing
 
 For testing my implementation, I first ran tests to check functionality of each part of the process - reading the input file with urls to retrieve, retrieving the data from the urls, organizing the data, calculating the average and median - on one csv dataset. I tested several successful cases on different data sets for each part as well as error cases for each part.
@@ -68,7 +58,7 @@ For testing my implementation, I first ran tests to check functionality of each 
 For testing the reading of the input file with the list of urls to process, I had uploaded the data files onto Github so that I could test retrieving the raw csv files over the network. I then listed a subset of the urls in the input file to test retrieving individual data files first and then retrieved multiple data files. Additionally, I listed urls for csv files that did not exist on Github as well as random urls that did not link to csv files such as www.google.com. I also listed strings that were not real urls such as random words and an empty string. These urls or strings were added to test the error handling of the http request and reading the response data. I also tested with urls that had leading and trailing spaces to ensure that these were trimmed and the data could be retrieved.
 
 #### Processing CSV data files:
-For csv data files, I used the given data files as well created my own test files. For my custom data files, I made both readable and unreadable csv files so that I could test both successful and error cases. For the readable files, I made a few that were small datasets to make verifying caluclations easier and to allow easier manipulation of the records to get the cases I wanted to test. Additionally, I created test datafiles that had the incorrect number of fields, had no data, had values with leading and trailing spaces, only had the field names in the data, had empty lines before and after showing the data, had the wrong fields, and had records where the value for the age field was not an integer to ensure that the program handled those correctly. 
+For csv data files, I used the given data files as well created my own test files. For my custom data files, I made both readable and unreadable csv files so that I could test both successful and error cases. For the readable files, I made a few that were small datasets to make verifying caluclations easier and to allow easier manipulation of the records to get the cases I wanted to test. Additionally, I created test datafiles for unusual cases such as when the csv file has the incorrect number of fields, has no data, has values with leading and trailing spaces, only has the field names in the data, has empty lines before and after showing the data, has the wrong fields, and has records where the value for the age field was not an integer to ensure that the program handled those correctly. 
 
 #### Calculating Average and Median:
 For some of the custom test files, I used smaller data sets to make it easier to verify the correctness of the calculated average and median values. I used datasets with both an even and odd amount of records so that I could test the two different cases of finding a median value. Additionally, for the datasets with an even amount of records I tested the cases where the median age is between the same age values and where the median age is between different age values. Also, since I used a frequency map for ages to calculate the median rather than using a list of the individual ages recorded in the dataset, I had to test the various cases that were used to determine the median age of the dataset when iterating through the map. I compared the median values calculated from the frequency map with the median values found by using a list with all the individual age values listed to verify the correctness. For the name printed out with the median age, I tested both the cases when the median age was in the map and when there was no name associated to the median age.
@@ -80,27 +70,21 @@ Once I was sure that my implementation was able to correctly handle multiple dat
 
 ---
 
-
-
-
 ### Design Considerations
-Aggregating in parts after each batch of goroutines finished or as goroutines finish
-Using sync map to store aggregated results
-Use list of ages along with age frequency map but wanted to save space
-Number of goroutines to use
-How to handle some errors like incorrect type for csv data
-Dealing with incorrect types for csv fields
+
+While implementing this program, I considered several options for various parts of the process. One item I considered was the number of goroutines to allow running concurrently. I chose a high number at first since it seems likely that the more goroutines the program has happening concurrently, the faster the program will finish. However, while testing various limits, the higher numbers I tested ended up being slower than the lower ones. From the tests, I ended up on settling with 100 goroutines as the limit. Another design possibility was rather than ignoring the age value that were the incorrect type in the readable csv files and continuing to process the remaining records in the file, I would consider the csv file an unreadable file and stop processing the data in it. However, most of the records could be fine and the incorrect type would not be found until that record is processed so I felt that since most of the data is fine, the file should still be considered readable. One other design consideration is keeping a list of the individual age along with the maps in the results. I already had it for testing and using it to find the median would be simpler than using frequency maps, but I thought the list would be extraneous and a waste of space so I did not keep it in the final implementation. One last consideration I had was to add more concurrency to the program such as aggregating the final results when each batch finishes rather than when all the URLs processed or adding it to the final result objects once the goroutine is finished. This would reduce the space required by the channels to hold the processed results especially with a large number of URLs to process. However, I felt that this added unnecessary complexity to the program and would not provide much benefit in increasing the runtime. It is easier to iterate over the results in the channel once all results are there and would not need to worry about using locks or sync maps to ensure that shared objects are not modified by multiple goroutines at the same time.
 
 ---
 
 ## Questions
 1. What assumptions did you make in your design? Why?
 
-   Some assumptions I made in my design are that the 
+  	One assumption I made is that the list of URLs will come in a file that has each URL on its own line. This is the most organized method I can think of to list the URLs especially if there are hundreds of URLs to process. Having the URLs listed with commas on one line would make the file difficult to read and organize when considering what URLs to list. Another assumption I made is that the URL can return any possible status code and any status code that is not 200-299 is not considered a success case. When handling the http response, I used this assumption to determine which status codes are for errors but there are too many and I know that the 200s are usually the successful requests while ones in the 400s and 500s are errors.
 
 2. How would you change your program if it had to process many files where each file was over 10M records?
 
+	If the files have that many records, I would change my program to better organize the records. Instead of iterating over each record one by one, I would use a divide and conquer approach to divide the 10M records into batches of thousands of records and process those batches concurrently. Then, once the results of all the batches are created, they would be aggregated as the results for the entire file. This would improve the speed at which a file is processed and decrease the runtime.
 
 3. How would you change your program if it had to process data from more than 20K URLs?
 
-   I don't think I would need to change 
+	If there are that many URLs to process data from, I don't think I would need to change my program. The concurrency I have when processing the URLs in batches of 100 was shown to perform better than larger batches when doing my tests so I don't think changing the amount of work being done concurrently will improve the processing of the data.
