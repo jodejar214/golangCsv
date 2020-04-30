@@ -290,7 +290,7 @@ func processCsvData() {
 
 	//Print out bad csvs
 	if len(badCsvs) > 0 {
-		fmt.Println("\n------------URLs Failed To Be Read------------:")
+		fmt.Println("\n------------URLs Failed To Be Read------------")
 		for _, c := range(badCsvs) {
 			fmt.Println(c)
 		}
@@ -310,5 +310,5 @@ func main() {
 	start := time.Now()
 	processCsvData()
 	totalTime := time.Now().Sub(start)
-	fmt.Println("Total runtime with a maximum of", maxNumOfGoRoutines, "goroutines running concurrently: ", totalTime)
+	fmt.Println("Total runtime with a maximum of", maxNumOfGoRoutines, "goroutines running concurrently: ", totalTime, "\n")
 }
