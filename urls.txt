@@ -1,17 +1,23 @@
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file1.csv
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file2.csv
-https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file3.csv
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file3.csv   
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file4.csv
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file5.csv
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file6_bad.csv
-https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file7.csv
-https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file8.csv
+  https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file8.csv
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file9_bad.csv
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file10.csv
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file11.csv
 https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file12.csv
-https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file13.csv
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file13.csv.    
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file14.csv
+      https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file15.csv
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file16.csv
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file17.csv
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file18.csv
+https://raw.githubusercontent.com/jodejar214/golangCsv/master/data/file19.csv
 
-https://ww.facebook.com
+https://www.facebook.com
 https://www.google.com
 hello
+crowdstrike

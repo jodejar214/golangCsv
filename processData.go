@@ -108,10 +108,19 @@ func retrieveCsvDataFromUrl(csvUrl string, resultsChan chan *CsvResults, badCsvs
 	}
 
 	if len(data) == 0 {
-		fmt.Println("Csv file has no data.")
+		fmt.Println("File has no data.")
 		badCsvsChan <- csvUrl
 		return
 	}
+
+	field1 := strings.Trim(data[0][0], " ")
+	field2 := strings.Trim(data[0][1], " ")
+	field3 := strings.Trim(data[0][2], " ")
+	if field1 != "fname" && field2 != "lname" && field3 != "age" {
+		fmt.Println("Incorrect fields for this file.")
+		badCsvsChan <- csvUrl
+		return
+	} 
 
 	organizeData(data, resultsChan)
 	return

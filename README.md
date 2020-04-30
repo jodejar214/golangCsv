@@ -4,10 +4,10 @@
 
 ### How To Build/Run:
 ---
-> go run csvData.go {file with list of urls}
+> go run processData.go {file with list of urls}
 
 ***Example:***
-go run csvData.go urls.txt
+go run processData.go urls.txt
 
 ---
 
@@ -60,7 +60,7 @@ For testing my implementation, I first ran tests to check functionality of each 
 For testing the reading of the input file with the list of urls to process, I had uploaded the data files onto Github so that I could test retrieving the raw csv files over the network. I then listed a subset of the urls in the input file to test retrieving individual data files first and then retrieved multiple data files. Additionally, I listed urls for csv files that did not exist on Github as well as random urls that did not link to csv files such as www.google.com. I also listed strings that were not real urls such as random words and an empty string. These urls or strings were added to test the error handling of the http request and reading the response data. I also tested with urls that had leading and trailing spaces to ensure that these were trimmed and the data could be retrieved.
 
 #### Processing CSV data files:
-For csv data files, I used the given data files as well created my own test files. For my custom data files, I made both readable and unreadable csv files so that I could test both successful and error cases. For the readable files, I made a few that were small datasets to make verifying caluclations easier and to allow easier manipulation of the records to get the cases I wanted to test. Additionally, I created files that had the incorrect number of fields, had no data, had values with leading and trailing spaces, only had the field names in the data, had empty lines before showing the data, and had records where the value for the age field was not an integer to ensure that the program handled those correctly. 
+For csv data files, I used the given data files as well created my own test files. For my custom data files, I made both readable and unreadable csv files so that I could test both successful and error cases. For the readable files, I made a few that were small datasets to make verifying caluclations easier and to allow easier manipulation of the records to get the cases I wanted to test. Additionally, I created files that had the incorrect number of fields, had no data, had values with leading and trailing spaces, only had the field names in the data, had empty lines before and after showing the data, and had records where the value for the age field was not an integer to ensure that the program handled those correctly. 
 
 #### Calculating Average and Median:
 For some of the custom test files, I used smaller data sets to make it easier to verify the correctness of the calculated average and median values. I used datasets with both an even and odd amount of records so that I could test the two different cases of finding a median value. Additionally, for the datasets with an even amount of records I tested the cases where the median age is between the same age values and where the median age is between different age values. Also, since I used a frequency map for ages to calculate the median rather than using a list of the individual ages recorded in the dataset, I had to test the various cases that were used to determine the median age of the dataset when iterating through the map. I compared the median values calculated from the frequency map with the median values found by using a list with all the individual age values listed to verify the correctness. For the name printed out with the median age, I tested both the cases when the median age was in the map and when there was no name associated to the median age.
