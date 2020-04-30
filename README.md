@@ -4,10 +4,18 @@
 
 ### How To Build/Run:
 
-```go run processData.go {file with list of urls}```
+```
+
+go run processData.go {file with list of urls}
+
+```
 
 ***Example:***
+```
+
 go run processData.go urls.txt
+
+```
 
 ---
 
