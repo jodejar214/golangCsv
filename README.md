@@ -3,8 +3,8 @@
 ## Code Design
 
 ### How To Build/Run:
----
-> go run processData.go {file with list of urls}
+
+```go run processData.go {file with list of urls}```
 
 ***Example:***
 go run processData.go urls.txt
@@ -15,7 +15,7 @@ go run processData.go urls.txt
 
 
 ### Implementation
----
+
 I seperated the entire process into different functions that I thought grouped the different functionality well. Also, I wanted the different parts to be cleanly seperated into concise and distinct functions for easy debugging and readability.
 
 #### Reading File With List of URLs:
@@ -38,7 +38,7 @@ To find the median in the case of an odd amount of records, the current index wa
 2. Current Index > Median Index --> Median age is the previous key in map
 3. Current Index < Median Index --> Increment current index
 
-To find the median in the case of an even amount of records, a similar method was used but instead of having just one median index, we needed to keep track of two indexes - the low median index and the high median index. This resulted in having four possible cases that would determine if the current index needed to be incremented or the two values needed to calculate the median age were founde.
+To find the median in the case of an even amount of records, a similar method was used but instead of having just one median index, we needed to keep track of two indexes - the low median index and the high median index. This resulted in having four possible cases that would determine if the current index needed to be incremented or the two values needed to calculate the median age were found.
 1. Current Index == Low Median Index & Current Index < High Median Index --> Median age is between current key and next key in map
 2. Current Index > Low Median Index & Current Index == High Median Index --> Median age is between previous key and current key in map
 3. Current Index > Low Median Index & Current Index > High Median Index --> Median age is the previous key in map
@@ -53,7 +53,7 @@ When the median age is found, the program then gets the name corresponding to th
 
 
 ### Testing
----
+
 For testing my implementation, I first ran tests to check functionality of each part of the process - reading the input file with urls to retrieve, retrieving the data from the urls, organizing the data, calculating the average and median - on one csv dataset. I tested several successful cases on different data sets for each part as well as error cases for each part.
 
 #### Reading File With List of URLs:
