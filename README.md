@@ -45,7 +45,7 @@ To find the median in the case of an even amount of records, a similar method wa
 4. Current Index < Low Median Index & Current Index < High Median Index --> Increment current index
 
 #### Printing Results:
-When the median age is found, the program then gets the name corresponding to the age in the other map and prints the two values out along with the calculated average. The list of bad URLs that failed to be read are also iterated over and printed out along with the stats. Finally, the time it took to complete the entire program is printed at the end. All other debugging information printed out during testing was removed to speed up the program. Only information on errors are printed out besides the results.
+When the median age is found, the program then gets the name corresponding to the age in the other map and prints the two values out along with the calculated average. The list of bad URLs that failed to be read are also iterated over and printed out along with the stats. Finally, the time it took to complete the entire program is printed at the end. All other debugging information printed out during testing was removed to speed up the program. Only information printed out besides the results are errors and which URL the program is processing so that the error can be matched to a URL.
 
 ---
 

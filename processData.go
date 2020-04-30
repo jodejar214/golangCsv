@@ -80,6 +80,7 @@ func getCsvInBatches(urlList []string) (chan *CsvResults, chan string) {
 func retrieveCsvDataFromUrl(csvUrl string, resultsChan chan *CsvResults, badCsvsChan chan string, wg *sync.WaitGroup){
 	defer wg.Done()
 	csvUrl = strings.Trim(csvUrl, " ")
+	fmt.Println("Retrieving data from:", csvUrl)
 	resp, err := http.Get(csvUrl)
 	if err != nil {
 		fmt.Println("Error with HTTP request:",  err.Error())
@@ -91,7 +92,7 @@ func retrieveCsvDataFromUrl(csvUrl string, resultsChan chan *CsvResults, badCsvs
 
 	//check if http returned data succesfully
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		fmt.Println("HTTP request was not able to retrieve data. StatusCode:", resp.StatusCode)
+		fmt.Println("Error: HTTP response returned with status code", resp.StatusCode)
 		badCsvsChan <- csvUrl
 		return
 	}
@@ -108,7 +109,7 @@ func retrieveCsvDataFromUrl(csvUrl string, resultsChan chan *CsvResults, badCsvs
 	}
 
 	if len(data) == 0 {
-		fmt.Println("File has no data.")
+		fmt.Println("Error: File has no data.")
 		badCsvsChan <- csvUrl
 		return
 	}
@@ -117,7 +118,7 @@ func retrieveCsvDataFromUrl(csvUrl string, resultsChan chan *CsvResults, badCsvs
 	field2 := strings.Trim(data[0][1], " ")
 	field3 := strings.Trim(data[0][2], " ")
 	if field1 != "fname" && field2 != "lname" && field3 != "age" {
-		fmt.Println("Incorrect fields for this file.")
+		fmt.Println("Error: Incorrect fields for this file.")
 		badCsvsChan <- csvUrl
 		return
 	} 
@@ -287,14 +288,14 @@ func processCsvData() {
 
 	//Print out bad csvs
 	if len(badCsvs) > 0 {
-		fmt.Println("------------URLs Failed To Be Read------------:")
+		fmt.Println("\n------------URLs Failed To Be Read------------:")
 		for _, c := range(badCsvs) {
 			fmt.Println(c)
 		}
 	}
 
 	//calculate stats and print out results
-	fmt.Println("----------------Statistics Results-----------------")
+	fmt.Println("\n----------------Statistics Results-----------------")
 	if len(finalCountMap) == 0 {
 		fmt.Println("No data was retrieved from the collection of csv files. Cannot caluclate average and median.")
 	} else {
